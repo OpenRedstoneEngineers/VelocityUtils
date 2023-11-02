@@ -35,6 +35,7 @@ dependencies {
     implementation(group = "com.velocitypowered", name = "velocity-api", version = "3.2.0-SNAPSHOT")
     implementation(group = "co.aikar", name = "acf-velocity", version = "0.5.1-SNAPSHOT")
     implementation(group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-yaml", version = "2.13.0")
+    implementation(group = "org.javacord", name = "javacord", version = "3.8.0")
     kapt(group = "com.velocitypowered", name = "velocity-api", version = "3.2.0-SNAPSHOT")
 }
 
