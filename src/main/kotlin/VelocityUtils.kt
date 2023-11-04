@@ -56,6 +56,7 @@ class VelocityUtils @Inject constructor(val proxy: ProxyServer, val logger: Logg
     private fun loadFeatures() {
         features = listOf(
             createMotdFeature(this),
+            createRememberFeature(this),
             createServerListFeature(this, mapper.treeToValue(config["list"], ListConfig::class.java)),
             createStatusFeature(this, mapper.treeToValue(config["status"], StatusConfig::class.java)),
             createPlayersListFeature(
