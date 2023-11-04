@@ -50,6 +50,9 @@ class VelocityUtils @Inject constructor(val proxy: ProxyServer, val logger: Logg
         commandManager = VelocityCommandManager(proxy, this).apply {
             registerCommand(VelocityUtilsCommand())
         }
+        commandManager.commandCompletions.registerCompletion("servers") {
+            return@registerCompletion proxy.allServers.map { it.serverInfo.name }
+        }
         loadFeatures()
     }
 
