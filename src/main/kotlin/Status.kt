@@ -75,12 +75,9 @@ fun updateDiscordStatus(server: ProxyServer, statusChannel: ServerTextChannel) {
     }
     val messages = statusChannel.getMessages(1).get()
     if (messages.isEmpty()) {
-        println("Empty! creating one.")
         statusChannel.sendMessage(embedBuilder).exceptionally(ExceptionLogger.get())
     } else {
-        println("Using existing message")
         messages.newestMessage.ifPresent {
-            println("editing...")
             it.edit("")
             it.edit(embedBuilder)
         }
