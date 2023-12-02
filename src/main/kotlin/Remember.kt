@@ -6,10 +6,10 @@ import co.aikar.commands.annotation.CommandCompletion
 import co.aikar.commands.annotation.CommandPermission
 import co.aikar.commands.annotation.Default
 import co.aikar.commands.annotation.Single
+import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.player.ServerPostConnectEvent
-import com.velocitypowered.api.proxy.Player
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.jetbrains.exposed.sql.*
@@ -80,38 +80,38 @@ private class SendCommand(
     val mm = MiniMessage.miniMessage()
     @Default
     @CommandCompletion("@players @servers")
-    fun default(player: Player, @Single user: String, @Single to: String) {
+    fun default(source: CommandSource, @Single user: String, @Single to: String) {
         val target = plugin.proxy.getPlayer(user).toNullable() ?: run {
-            player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+            source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                 Component.text("Player not available").resolveTo("message")
             ))
             return
         }
         val targetServer = plugin.proxy.getServer(to).toNullable() ?: run {
-            player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+            source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                 Component.text("Target server does not exist").resolveTo("message")
             ))
             return
         }
         if (target.currentServer.toNullable()?.serverInfo?.name == to) {
-            player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+            source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                 Component.text("Player is already connected to that server").resolveTo("message")
             ))
             return
         }
         target.createConnectionRequest(targetServer).connect().whenComplete { result, error ->
             if (result == null) {
-                player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+                source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                     Component.text("Failed to send $user to '$to'").resolveTo("message")
                 ))
-                player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+                source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                     Component.text(error.localizedMessage).resolveTo("message")
                 ))
             } else {
                 target.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                     Component.text("You have been sent to '$to'").resolveTo("message")
                 ))
-                player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+                source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                     Component.text("Sent $user to '$to'").resolveTo("message")
                 ))
             }
@@ -128,30 +128,30 @@ class SendAllCommand(
 
     @Default
     @CommandCompletion("@servers @servers")
-    fun default(player: Player, @Single from: String, @Single to: String) {
+    fun default(source: CommandSource, @Single from: String, @Single to: String) {
         if (from == to) {
-            player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+            source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                 Component.text("Source and destination are the same").resolveTo("message")
             ))
             return
         }
-        val source = plugin.proxy.getServer(from).toNullable() ?: run {
-            player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+        val serverFrom = plugin.proxy.getServer(from).toNullable() ?: run {
+            source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                 Component.text("Source server does not exist").resolveTo("message")
             ))
             return
         }
-        val destination = plugin.proxy.getServer(to).toNullable() ?: run {
-            player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+        val serverTo = plugin.proxy.getServer(to).toNullable() ?: run {
+            source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                 Component.text("Destination server does not exist").resolveTo("message")
             ))
             return
         }
-        player.sendMessage(mm.deserialize(velocityUtilsCommandBase,
-            Component.text("Creating connection requests for ${source.playersConnected.size} players from '$from' to '$to'").resolveTo("message")
+        source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+            Component.text("Creating connection requests for ${serverFrom.playersConnected.size} players from '$from' to '$to'").resolveTo("message")
         ))
-        source.playersConnected.forEach {
-            it.createConnectionRequest(destination).connect().whenComplete { result, _ ->
+        serverFrom.playersConnected.forEach {
+            it.createConnectionRequest(serverTo).connect().whenComplete { result, _ ->
                 if (result != null) {
                     it.sendMessage(mm.deserialize(velocityUtilsCommandBase,
                         Component.text("You have been sent to '$to'").resolveTo("message")
