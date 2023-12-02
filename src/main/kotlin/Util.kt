@@ -8,3 +8,5 @@ import java.util.*
 fun Component.resolveTo(that: String) = TagResolver.resolver(that, Tag.inserting(this))
 
 internal fun <T> Optional<T>.toNullable(): T? = this.orElse(null)
+
+const val velocityUtilsCommandBase = "<dark_gray>[<gray>VelocityUtils<dark_gray>] <gray><message>"

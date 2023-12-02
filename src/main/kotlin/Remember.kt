@@ -16,8 +16,6 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
-const val velocityUtilsCommandBase = "<dark_gray>[<gray>VelocityUtils<dark_gray>] <gray><message>"
-
 object PlayerServerMapping : Table("mapping") {
     val uuid = varchar("uuid", 36).index()
     val server = varchar("server", 32)
