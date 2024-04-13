@@ -6,7 +6,7 @@ plugins {
     id("org.jetbrains.kotlin.kapt") version "1.6.10"
 }
 
-group = ""
+group = "org.openredstone.velocityutils"
 version = "1.0"
 
 repositories {
