@@ -3,7 +3,6 @@ package org.openredstone.velocityutils
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import com.velocitypowered.api.proxy.Player
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.luckperms.api.LuckPerms
@@ -30,7 +29,7 @@ data class ApplyConfig(
     val questions: List<List<String>> = listOf(
         listOf("<yellow>Are you interested in learning about computational redstone?", "yes"),
         listOf("<yellow>Do you have prior experience in redstone?", "either"),
-        listOf("<yellow>Have you read <hover:show_text:'View rules'><click:open_url:'https://openredstone.org/rules'>" +
+        listOf("<yellow>Have you read and agree to <hover:show_text:'View rules'><click:open_url:'https://openredstone.org/rules'>" +
             "<gold>the rules</gold></click></hover>?", "yes")
     )
 )
@@ -55,15 +54,11 @@ class ApplyCommand(
     private fun sendQuestion(player: Player) {
         val applicant = applications[player.uniqueId]!!
         config.questions[applicant].let {
-            val replacements: Map<String, Component> = mapOf(
-                "question" to mm.deserialize(it.first()),
-                "response" to mm.deserialize(config.responseFormat)
-            )
-            val allReplacements = replacements.map { rep ->
-                Placeholder.component(rep.key, rep.value)
-            }.toMutableList().apply {
-                this.add(prefixReplacement)
-            }.toTypedArray()
+            val allReplacements = listOf(
+                Placeholder.component("question", mm.deserialize(it.first())),
+                Placeholder.component("response", mm.deserialize(config.responseFormat)),
+                prefixReplacement
+            ).toTypedArray()
             player.sendMessage(mm.deserialize(config.questionFormat, *allReplacements))
         }
     }
