@@ -3,6 +3,7 @@ package org.openredstone.velocityutils
 import co.aikar.commands.BaseCommand
 import co.aikar.commands.annotation.*
 import com.velocitypowered.api.proxy.Player
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.luckperms.api.LuckPerms
@@ -10,14 +11,14 @@ import net.luckperms.api.node.types.InheritanceNode
 import java.util.*
 
 data class ApplyConfig(
+    val builderGroup: String = "builder",
+    val destinationServer: String = "school",
     val prefix: String = "<dark_gray>[<gray>Application<dark_gray>]<reset>",
     val ineligible: String = "<prefix> <yellow>You are not eligible to apply</yellow>",
-    val builderGroup: String = "builder",
     val alreadyApplying: String = "<prefix> <yellow>You are currently in the application process.</yellow>",
     val notApplying: String = "<prefix> <yellow>You are currently not in the application process.</yellow>",
-    val accepted: String = "<prefix> <yellow>Congratulations! You can claim your plot by " +
-        "<hover:show_text:'Go to School'><click:run_command:'/server school'><gold>going to the School server</gold>" +
-        "</click></hover> executing <hover:show_text:'Run command'><click:run_command:'/p auto'><gold>/p auto</gold>" +
+    val accepted: String = "<prefix> <yellow>Congratulations! You have been sent to the <server> server. You can " +
+        "claim a plot by typing <hover:show_text:'Run command'><click:run_command:'/p auto'><gold>/p auto</gold>" +
         "</click></hover>",
     val questionFormat: String = "<prefix> <yellow><question> <response>",
     val responseFormat: String = "<gold><hover:show_text:'Answer \"Yes\"'><click:run_command:'/apply reply yes'>[Yes]" +
@@ -29,21 +30,22 @@ data class ApplyConfig(
     val questions: List<List<String>> = listOf(
         listOf("<yellow>Are you interested in learning about computational redstone?", "yes"),
         listOf("<yellow>Do you have prior experience in redstone?", "either"),
-        listOf("<yellow>Have you read and agree to <hover:show_text:'View rules'><click:open_url:'https://openredstone.org/rules'>" +
-            "<gold>the rules</gold></click></hover>?", "yes")
+        listOf("<yellow>Have you read and agree to <hover:show_text:'View rules'>" +
+            "<click:open_url:'https://openredstone.org/rules'><gold>the rules</gold></click></hover>?", "yes")
     )
 )
 
-fun createApplyFeature(luckPerms: LuckPerms, config: ApplyConfig): Feature {
+fun createApplyFeature(plugin: VelocityUtils, luckPerms: LuckPerms, config: ApplyConfig): Feature {
     val mm = MiniMessage.miniMessage()
     return Feature(
-        commands = listOf(ApplyCommand(luckPerms, mm, config)),
+        commands = listOf(ApplyCommand(plugin, luckPerms, mm, config)),
     )
 }
 
 @CommandAlias("apply")
 @CommandPermission("velocityutils.apply")
 class ApplyCommand(
+    private val plugin: VelocityUtils,
     private val luckPerms: LuckPerms,
     private val mm: MiniMessage,
     private val config: ApplyConfig
@@ -75,8 +77,7 @@ class ApplyCommand(
                     InheritanceNode.builder(it.primaryGroup).value(true).build().let { node -> it.data().remove(node)}
                     luckPerms.userManager.saveUser(it)
                 }
-                source.sendMessage(mm.deserialize(config.accepted, prefixReplacement))
-                applications.remove(source.uniqueId)
+                processAccepted(source)
             } else {
                 sendQuestion(source)
             }
@@ -84,6 +85,24 @@ class ApplyCommand(
             source.sendMessage(mm.deserialize(config.incorrect, prefixReplacement))
             applications.remove(source.uniqueId)
         }
+    }
+
+    private fun processAccepted(source: Player) {
+        val serverTo = plugin.proxy.getServer(config.destinationServer).toNullable() ?: run {
+            source.sendMessage(mm.deserialize(velocityUtilsCommandBase,
+                Component.text("Destination server does not exist").resolveTo("message")
+            ))
+            return
+        }
+        source.createConnectionRequest(serverTo).connect()
+        val allReplacements = listOf(
+            Placeholder.component("server", mm.deserialize(config.destinationServer.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+            })),
+            prefixReplacement
+        ).toTypedArray()
+        source.sendMessage(mm.deserialize(config.accepted, *allReplacements))
+        applications.remove(source.uniqueId)
     }
 
     @Default

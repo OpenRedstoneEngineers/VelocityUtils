@@ -58,7 +58,11 @@ class VelocityUtils @Inject constructor(val proxy: ProxyServer, val logger: Logg
 
     private fun loadFeatures() {
         features = listOf(
-            createApplyFeature(LuckPermsProvider.get(), mapper.treeToValue(config["apply"], ApplyConfig::class.java)),
+            createApplyFeature(
+                this,
+                LuckPermsProvider.get(),
+                mapper.treeToValue(config["apply"], ApplyConfig::class.java)
+            ),
             createMotdFeature(this),
             createRememberFeature(this),
             createServerAliasFeature(this),
