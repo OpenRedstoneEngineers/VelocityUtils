@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.google.inject.Inject
+import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.plugin.Dependency
@@ -62,6 +63,10 @@ class VelocityUtils @Inject constructor(val proxy: ProxyServer, val logger: Logg
                 this,
                 LuckPermsProvider.get(),
                 mapper.treeToValue(config["apply"], ApplyConfig::class.java)
+            ),
+            createMaintenanceFeature(
+                this,
+                mapper.treeToValue(config["maintenance"], MaintenanceConfig::class.java)
             ),
             createMotdFeature(this),
             createRememberFeature(this),
@@ -122,9 +127,9 @@ class VelocityUtils @Inject constructor(val proxy: ProxyServer, val logger: Logg
         }
 
         @Subcommand("reload")
-        fun reload(player: Player) {
+        fun reload(commandSource: CommandSource) {
             reload()
-            player.sendMessage(velocityUtilsMessage("Reloaded"))
+            commandSource.sendMessage(velocityUtilsMessage("Reloaded"))
         }
     }
 }
