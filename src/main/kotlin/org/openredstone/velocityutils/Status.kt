@@ -19,6 +19,9 @@ import java.util.concurrent.TimeUnit
 val serversOnline = ConcurrentHashMap<String, Boolean>()
 
 fun createStatusFeature(plugin: VelocityUtils, config: StatusConfig): Feature {
+    if (config.discordApiKey.isEmpty()) {
+        return Feature()
+    }
     val api = DiscordApiBuilder()
         .setToken(config.discordApiKey)
         .setAllIntents()
