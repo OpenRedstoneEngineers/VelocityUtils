@@ -52,7 +52,7 @@ private fun ProxyServer.createServerList(config: ListConfig, mm: MiniMessage): C
     Component.text("${this.playerCount}").resolveTo("total_player_count")
 )
 
-@CommandAlias("list|ls")
+@CommandAlias("list|ls|glist")
 @CommandPermission("velocityutils.list")
 private class ListCommand(
     private val createList: () -> Component,

@@ -50,7 +50,7 @@ private fun createPlayersList(
     return mm.deserialize(
         config.format,
         Component.join(
-            JoinConfiguration.separator(mm.deserialize(config.format)),
+            JoinConfiguration.separator(mm.deserialize(config.rankSeparator)),
             playerMap.map { (rank, players) ->
                 val playerList = Component.join(
                     JoinConfiguration.separator(mm.deserialize(config.playerSeparator)),
@@ -67,7 +67,7 @@ private fun createPlayersList(
     )
 }
 
-@CommandAlias("players")
+@CommandAlias("players|online")
 @CommandPermission("velocityutils.players")
 private class PlayersCommand(
     private val createList: () -> Component

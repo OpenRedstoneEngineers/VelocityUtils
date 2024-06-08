@@ -15,8 +15,8 @@ A Velocity utility plugin that does various things:
 | Command                   | Permission                      | Description                           |
 |---------------------------|---------------------------------|---------------------------------------|
 | `/apply`                  | `velocityutils.apply`           | Begin the student application process |
-| `/players`                | `velocityutils.players`         | List players by rank                  |
-| `/list\|/ls`              | `velocityutils.list`            | List players by server                |
+| `/players\|/online`       | `velocityutils.players`         | List players by rank                  |
+| `/list\|/ls\|/glist`      | `velocityutils.list`            | List players by server                |
 | `/<server>`               | `velocityutils.server.<server>` | Change servers                        |
 | `/motd`                   | `velocityutils.motd`            | Show MOTD                             |
 | `/send <player> <server>` | `velocityutils.send`            | Send a player to a specific server    |
