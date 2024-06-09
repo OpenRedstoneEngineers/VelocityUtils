@@ -9,9 +9,10 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.node.types.InheritanceNode
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 data class ApplyConfig(
-    val builderGroup: String = "builder",
+    val studentGroup: String = "student",
     val destinationServer: String = "school",
     val prefix: String = "<dark_gray>[<gray>Application<dark_gray>]<reset>",
     val ineligible: String = "<prefix> <yellow>You are not eligible to apply</yellow>",
@@ -73,8 +74,10 @@ class ApplyCommand(
             applications[source.uniqueId] = progress + 1
             if (applications[source.uniqueId] == config.questions.size) {
                 luckPerms.userManager.getUser(source.uniqueId)?.let {
-                    InheritanceNode.builder(config.builderGroup).value(true).build().let { node -> it.data().add(node)}
-                    InheritanceNode.builder(it.primaryGroup).value(true).build().let { node -> it.data().remove(node)}
+                    val oldNode = InheritanceNode.builder(it.primaryGroup).value(true).build()
+                    it.data().remove(oldNode)
+                    val newNode = InheritanceNode.builder(config.studentGroup).value(true).build()
+                    it.data().add(newNode)
                     luckPerms.userManager.saveUser(it)
                 }
                 processAccepted(source)
@@ -95,14 +98,19 @@ class ApplyCommand(
             return
         }
         source.createConnectionRequest(serverTo).connect()
-        val allReplacements = listOf(
-            Placeholder.component("server", mm.deserialize(config.destinationServer.replaceFirstChar {
-                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
-            })),
-            prefixReplacement
-        ).toTypedArray()
-        source.sendMessage(mm.deserialize(config.accepted, *allReplacements))
         applications.remove(source.uniqueId)
+        plugin.proxy.scheduler
+            .buildTask(plugin) { _ ->
+                val allReplacements = listOf(
+                    Placeholder.component("server", mm.deserialize(config.destinationServer.replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+                    })),
+                    prefixReplacement
+                ).toTypedArray()
+                source.sendMessage(mm.deserialize(config.accepted, *allReplacements))
+            }
+            .delay(2, TimeUnit.SECONDS)
+            .schedule()
     }
 
     @Default
