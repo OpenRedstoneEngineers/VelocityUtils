@@ -78,6 +78,7 @@ class ApplyCommand(
                     it.data().remove(oldNode)
                     val newNode = InheritanceNode.builder(config.studentGroup).value(true).build()
                     it.data().add(newNode)
+                    it.setPrimaryGroup(config.studentGroup)
                     luckPerms.userManager.saveUser(it).thenRun {
                         luckPerms.messagingService.toNullable()?.pushUserUpdate(it)
                     }

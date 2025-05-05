@@ -1,9 +1,11 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.jetbrains.kotlin.jvm") version "1.9.22"
-    id("org.jetbrains.kotlin.kapt") version "1.9.22"
+    val kotlinVersion = "2.1.10"
+    kotlin("jvm") version kotlinVersion
+    kotlin("kapt") version kotlinVersion
+    id("com.gradleup.shadow") version "8.3.6"
 }
 
 group = "org.openredstone.velocityutils"
@@ -11,21 +13,10 @@ version = "1.0"
 
 repositories {
     mavenCentral()
-    maven {
-        name = "sonatype-oss"
-        url = uri("https://oss.sonatype.org/content/groups/public/")
-    }
-    maven {
-        name = "aikar"
-        url = uri("https://repo.aikar.co/content/groups/aikar/")
-    }
-    maven {
-        url = uri("https://jitpack.io")
-    }
-    maven {
-        name = "papermc"
-        url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
+    maven("https://oss.sonatype.org/content/groups/public/")
+    maven("https://repo.aikar.co/content/groups/aikar/")
+    maven("https://jitpack.io")
+    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
@@ -33,7 +24,6 @@ dependencies {
     implementation(group = "net.luckperms", name = "api", version = "5.1")
     implementation(group = "org.jetbrains.exposed", name = "exposed-core", version = "0.40.1")
     implementation(group = "org.jetbrains.exposed", name = "exposed-jdbc", version = "0.40.1")
-    //implementation(group = "org.jetbrains.exposed", name = "exposed-java-time", version = "0.40.1")
     implementation(group = "org.xerial", name = "sqlite-jdbc", version = "3.30.1")
     implementation(group = "com.velocitypowered", name = "velocity-api", version = "3.3.0-SNAPSHOT")
     implementation(group = "co.aikar", name = "acf-velocity", version = "0.5.1-SNAPSHOT")
@@ -43,8 +33,15 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
-    kotlinOptions.javaParameters = true
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 tasks.shadowJar {
